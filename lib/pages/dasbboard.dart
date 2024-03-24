@@ -532,15 +532,15 @@ class _DashboardState extends State<Dashboard> {
               ],
             ),
             GridView(
-              padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
+              padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
               shrinkWrap: true,
               scrollDirection: Axis.vertical,
-              physics: ScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              physics: const ScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 crossAxisSpacing: 8,
                 mainAxisSpacing: 8,
-                childAspectRatio: 1,
+                childAspectRatio: 1.3,
               ),
               children: [
                 Container(
@@ -622,49 +622,86 @@ class _DashboardState extends State<Dashboard> {
                     ],
                   ),
                 ),
-              ],
-            ),
-            Container(
-              margin: EdgeInsets.all(0),
-              padding: EdgeInsets.all(0),
-              width: 200,
-              height: 100,
-              decoration: BoxDecoration(
-                color: Color(0xff3a57e8),
-                shape: BoxShape.rectangle,
-                borderRadius: BorderRadius.circular(16.0),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  Text(
-                    "Hari ini",
-                    textAlign: TextAlign.start,
-                    overflow: TextOverflow.clip,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontStyle: FontStyle.normal,
-                      fontSize: 10,
-                      color: Color(0xffffffff),
-                    ),
+                Container(
+                  margin: EdgeInsets.all(0),
+                  padding: EdgeInsets.all(0),
+                  width: 200,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: Color(0xff3a57e9),
+                    shape: BoxShape.rectangle,
+                    borderRadius: BorderRadius.circular(16.0),
                   ),
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(0, 5, 0, 0),
-                    child: Container(
-                      height: 80,
-                      width: 80,
-                      clipBehavior: Clip.antiAlias,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      Text(
+                        "Hari ini",
+                        textAlign: TextAlign.start,
+                        overflow: TextOverflow.clip,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontStyle: FontStyle.normal,
+                          fontSize: 15,
+                          color: Color(0xffffffff),
+                        ),
                       ),
-                      child: Image.asset("assets/images/jenkel1.png",
-                          fit: BoxFit.cover),
-                    ),
+                      Expanded(
+                        child: FutureBuilder<List<PelanggaranKategoriData>>(
+                          future: fetchPelanggaranKategoriData(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            } else if (snapshot.hasError) {
+                              return Center(
+                                child: Text('Error: ${snapshot.error}'),
+                              );
+                            } else {
+                              List<PelanggaranKategoriData>
+                                  _pelanggaranKategoriData = snapshot.data!;
+
+                              return SfCircularChart(
+                                palette: const <Color>[
+                                  Colors.amber,
+                                  Colors.lightBlue,
+                                  Colors.white,
+                                  Colors.purple
+                                ],
+                                tooltipBehavior: _tooltipBehaviorKategori,
+                                // legend: Legend(
+                                //   isVisible: true,
+                                //   overflowMode: LegendItemOverflowMode.wrap,
+                                // ),
+                                series: <CircularSeries>[
+                                  DoughnutSeries<PelanggaranKategoriData,
+                                      String>(
+                                    dataSource: _pelanggaranKategoriData,
+                                    xValueMapper:
+                                        (PelanggaranKategoriData data, _) =>
+                                            data.kategori,
+                                    yValueMapper:
+                                        (PelanggaranKategoriData data, _) =>
+                                            data.total,
+                                    dataLabelSettings: const DataLabelSettings(
+                                        isVisible: true),
+                                    enableTooltip: true,
+                                    sortingOrder: SortingOrder.descending,
+                                  )
+                                ],
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ],
         ),
